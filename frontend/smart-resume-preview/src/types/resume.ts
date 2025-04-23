@@ -60,7 +60,6 @@ export interface User {
   password?: string;
   role: "USER" | "ADMIN";
   pdf?: string[];
-  refreshToken: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

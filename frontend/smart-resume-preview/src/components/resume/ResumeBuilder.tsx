@@ -54,7 +54,7 @@ export const ResumeBuilder = () => {
     }
     
     try {
-      // Using a simpler approach
+   
       if (resumeRef.current) {
         await generatePdf(() => resumeRef.current, { 
           filename: `${resumeData.personalInfo.fullName || "resume"}.pdf`,
@@ -87,9 +87,6 @@ export const ResumeBuilder = () => {
       });
       return;
     }
-
-    // In a real implementation, we would create a PDF file here
-    // For now, we'll just open the email dialog
     setEmailDialogOpen(true);
   };
 

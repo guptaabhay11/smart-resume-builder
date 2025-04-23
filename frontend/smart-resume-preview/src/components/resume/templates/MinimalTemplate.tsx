@@ -1,7 +1,4 @@
-
 import { ResumeData } from "@/types/resume";
-import { Badge } from "@/components/ui/badge";
-import { Briefcase, School, Calendar, Link, Mail, Phone, MapPin, Linkedin, Github, Globe } from "lucide-react";
 
 interface MinimalTemplateProps {
   data: ResumeData;
@@ -19,47 +16,12 @@ export const MinimalTemplate = ({ data }: MinimalTemplateProps) => {
         
         {/* Contact Info */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-slate-600">
-          {personalInfo.email && (
-            <div className="flex items-center gap-1">
-              <Mail className="h-3 w-3" />
-              <span>{personalInfo.email}</span>
-            </div>
-          )}
-          
-          {personalInfo.phone && (
-            <div className="flex items-center gap-1">
-              <Phone className="h-3 w-3" />
-              <span>{personalInfo.phone}</span>
-            </div>
-          )}
-          
-          {personalInfo.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              <span>{personalInfo.location}</span>
-            </div>
-          )}
-          
-          {personalInfo.linkedin && (
-            <div className="flex items-center gap-1">
-              <Linkedin className="h-3 w-3" />
-              <span>{personalInfo.linkedin}</span>
-            </div>
-          )}
-          
-          {personalInfo.github && (
-            <div className="flex items-center gap-1">
-              <Github className="h-3 w-3" />
-              <span>{personalInfo.github}</span>
-            </div>
-          )}
-          
-          {personalInfo.website && (
-            <div className="flex items-center gap-1">
-              <Globe className="h-3 w-3" />
-              <span>{personalInfo.website}</span>
-            </div>
-          )}
+          {personalInfo.email && <span>{personalInfo.email}</span>}
+          {personalInfo.phone && <span>{personalInfo.phone}</span>}
+          {personalInfo.location && <span>{personalInfo.location}</span>}
+          {personalInfo.linkedin && <span>{personalInfo.linkedin}</span>}
+          {personalInfo.github && <span>{personalInfo.github}</span>}
+          {personalInfo.website && <span>{personalInfo.website}</span>}
         </div>
       </div>
 
@@ -138,9 +100,8 @@ export const MinimalTemplate = ({ data }: MinimalTemplateProps) => {
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">{project.title}</h4>
                   {project.link && (
-                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 flex items-center">
-                      <Link className="h-3 w-3 mr-1" />
-                      <span>View Project</span>
+                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600">
+                      View Project
                     </a>
                   )}
                 </div>

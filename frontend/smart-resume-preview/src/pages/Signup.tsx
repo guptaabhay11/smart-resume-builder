@@ -4,113 +4,60 @@ import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
-import { useLoginMutation } from "../services/api";
-import { jwtDecode } from 'jwt-decode';
-import { useDispatch } from 'react-redux';
-import { setTokens } from '../store/reducers/authReducer';
-import { Button } from "@/components/ui/button";
+import { useRegisterMutation } from "../services/api";
+import { User } from "../types/resume";
 import { Eye, EyeOff } from "lucide-react";
 
-interface DecodedToken {
-  id?: string;
-  role?: 'USER' | 'ADMIN';
-  name?: string;
-  email?: string;
-  [key: string]: any;
-}
-
 const validation = yup.object({
-  email: yup.string().email("Email is invalid").required("Email is required"),
-  password: yup
+  name: yup.string().required("Name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  password: yup.string().required("Password is required").min(5).max(16),
+  confirmPassword: yup
     .string()
-    .required("Password is required")
-    .min(5, "Minimum 5 characters required")
-    .max(16, "Maximum 16 characters allowed"),
+    .oneOf([yup.ref("password")], "Passwords must match")
+    .required("Please confirm your password"),
 });
 
 type FormData = yup.InferType<typeof validation>;
 
-export default function LoginForm() {
-  const [loginUser] = useLoginMutation();
+export default function SignupForm() {
+  const [registerUser] = useRegisterMutation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<FormData>({
-    defaultValues: { email: "", password: "" },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
     resolver: yupResolver(validation),
     mode: "onChange",
   });
 
   const handleDashboardClick = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   const onSubmit = async (data: FormData) => {
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
     try {
-      // 1. Attempt login
-      const loginResponse = await loginUser(data as { email: string; password: string }).unwrap();
-      
-      if (!loginResponse.success) {
-        throw new Error(loginResponse?.message || "Authentication failed");
-      }
-
-      // 2. Store tokens and user data
-      const { accessToken, refreshToken } = loginResponse.data;
-      
-      // Dispatch action to store tokens in Redux and localStorage
-      dispatch(setTokens({ 
-        accessToken, 
-        refreshToken 
-      }));
-
-      // 3. Decode token to get user information
-      const decodedToken = jwtDecode<DecodedToken>(accessToken);
-      
-      if (!decodedToken._id || !decodedToken.role) {
-        throw new Error("Invalid token payload");
-      }
-
-      // 4. Redirect based on role
-      const redirectPath = decodedToken.role === "USER" 
-        ? "/dashboard" 
-        : `/user/dashboard`;
-      
-      navigate(redirectPath, { replace: true });
-      toast.success("Login successful!");
-
+      await registerUser(data as Omit<User, '_id' | 'active' | 'role'> & { confirmPassword: string }).unwrap();
+      toast.success("User registered successfully!");
+      navigate("/login", { replace: true });
     } catch (error: any) {
-      console.error("Login error:", error);
-      
-      // Clear tokens on error
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-
-      let errorMessage = "Login failed. Please try again.";
-      
-      if (error?.status === 401) {
-        errorMessage = "Invalid email or password";
-      } else if (error?.status === 403) {
-        errorMessage = "Account not verified or blocked";
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+      const validationError = error?.data?.data?.errors?.[0]?.msg;
+      toast.error(
+        validationError ?? error?.data?.message ?? "Something went wrong!"
+      );
     }
   };
 
@@ -129,10 +76,28 @@ export default function LoginForm() {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white shadow-xl rounded-xl w-full max-w-md p-8 border border-[#d5e5f6]">
-          <h1 className="text-2xl font-bold text-[#1e4976] mb-2">Welcome Back</h1>
-          <p className="text-gray-600 mb-6">Please sign in to your account</p>
+          <h1 className="text-2xl font-bold text-[#1e4976] mb-2">Create Account</h1>
+          <p className="text-gray-600 mb-6">Register to get started.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-[#1e4976]">
+                Name
+              </label>
+              <input
+                type="text"
+                className={`w-full px-4 py-2 rounded-lg border ${
+                  errors.name ? 'border-red-500' : 'border-[#a3c2e2]'
+                } bg-[#f8fafd] focus:ring-2 focus:ring-[#4285f4] focus:border-transparent outline-none transition-colors`}
+                placeholder="Full Name"
+                {...register("name")}
+                autoFocus
+              />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+              )}
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-1 text-[#1e4976]">
                 Email Address
@@ -144,9 +109,7 @@ export default function LoginForm() {
                 } bg-[#f8fafd] focus:ring-2 focus:ring-[#4285f4] focus:border-transparent outline-none transition-colors`}
                 placeholder="you@example.com"
                 {...register("email")}
-                disabled={isSubmitting}
                 autoComplete="email"
-                autoFocus
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
@@ -165,8 +128,7 @@ export default function LoginForm() {
                   } bg-[#f8fafd] focus:ring-2 focus:ring-[#4285f4] focus:border-transparent outline-none transition-colors`}
                   placeholder="••••••••"
                   {...register("password")}
-                  disabled={isSubmitting}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
@@ -185,38 +147,65 @@ export default function LoginForm() {
               )}
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1 text-[#1e4976]">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className={`w-full px-4 py-2 rounded-lg border ${
+                    errors.confirmPassword ? 'border-red-500' : 'border-[#a3c2e2]'
+                  } bg-[#f8fafd] focus:ring-2 focus:ring-[#4285f4] focus:border-transparent outline-none transition-colors`}
+                  placeholder="••••••••"
+                  {...register("confirmPassword")}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#1e4976]"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+
             <button
               type="submit"
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid}
               className={`w-full py-3 rounded-lg text-white font-semibold text-base mt-6 ${
-                !isValid || isSubmitting
+                !isValid
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-[#1e4976] hover:bg-[#0d3c6e]'
               } transition-colors shadow-md`}
             >
-              {isSubmitting ? (
-                <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                </div>
-              ) : (
-                "Sign In"
-              )}
+              Sign Up
             </button>
 
             <div className="text-center mt-6">
               <p className="text-gray-600">
-                Don't have an account?{" "}
+                Already have an account?{" "}
                 <NavLink
-                  to="/signup"
+                  to="/login"
                   className="text-[#4285f4] font-medium hover:underline"
                 >
-                  Create one
+                  Log in
                 </NavLink>
               </p>
             </div>
           </form>
         </div>
       </div>
+
+      
     </div>
   );
 }

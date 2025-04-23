@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import MyResumes from "./pages/MyResume";
 import MyResume from "./pages/MyResume";
+import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-resumes" element={<MyResume />} />
+          <Route path="/register" element={<Signup />} />
         </Routes>
       
     </TooltipProvider>
