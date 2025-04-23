@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import emailjs from "@emailjs/browser";
+import { useSendFileMutation } from "@/services/api"; 
 
 interface EmailFormProps {
   pdfFile?: File;
@@ -16,9 +15,11 @@ export const EmailForm = ({ pdfFile, onSuccess }: EmailFormProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const [sendFile] = useSendFileMutation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!pdfFile) {
       toast({
         title: "No resume to send",
@@ -39,13 +40,18 @@ export const EmailForm = ({ pdfFile, onSuccess }: EmailFormProps) => {
 
     setLoading(true);
 
-    // This is a mock implementation since EmailJS requires actual service IDs
-    // For a real implementation, you would need to set up EmailJS with your account
     try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("file", pdfFile);
+
+      await sendFile(formData).unwrap();
+
       toast({
         title: "Email Sent!",
         description: `Your resume has been sent to ${email}`,
       });
+
       setEmail("");
       if (onSuccess) onSuccess();
     } catch (error) {
