@@ -34,7 +34,7 @@ export const uploadToCloudinary = async (
       const result = await new Promise<{ url: string }>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            resource_type: 'raw',
+            resource_type: 'auto',
             folder: `resume/${req.auth?.id}`,
           },
           (err, uploadResult) => {
