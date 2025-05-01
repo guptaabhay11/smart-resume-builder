@@ -38,7 +38,10 @@ const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.deleteUser = deleteUser;
 const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_schema_1.default.findById(id).lean();
+    console.log("ID", id);
+    const result = yield user_schema_1.default.findById(id)
+        .select('-password')
+        .lean();
     return result;
 });
 exports.getUserById = getUserById;
@@ -58,7 +61,6 @@ const getUserByEmail = (email_1, ...args_1) => __awaiter(void 0, [email_1, ...ar
 exports.getUserByEmail = getUserByEmail;
 const addPdfUrlToUser = (id, pdfUrl) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_schema_1.default.findByIdAndUpdate(id, { $push: { pdf: pdfUrl } }, { new: true }).select('-password');
-    console.log(result);
     return result;
 });
 exports.addPdfUrlToUser = addPdfUrlToUser;
@@ -71,7 +73,6 @@ const uploadPdfToCloudinary = (uploadResult, userId) => __awaiter(void 0, void 0
         return updatedUser;
     }
     catch (error) {
-        console.error("Error updating user with PDF URL:", error);
         throw error;
     }
 });

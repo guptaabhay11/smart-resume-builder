@@ -43,14 +43,15 @@ export const getAllUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
-    const user = req.user as Omit<IUser, "password">;
+    const user = req.user as Omit<IUser, "password" & "pdf">;
     const tokens = createUserTokens(user);
     res.send(createResponse(tokens))
 });
 
 
 export const getUserInfo = asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req.user as any)?._id;
+    const userId = (req.user as any)?.id;
+
     const user = await userService.getUserById(userId);
     res.send(createResponse(user))
 });

@@ -32,8 +32,11 @@ export const deleteUser = async (id: string) => {
 };
 
 export const getUserById = async (id: string) => {
-    const result = await UserSchema.findById(id).lean();
-    return result;
+  console.log("ID", id);
+  const result = await UserSchema.findById(id)
+    .select('-password') 
+    .lean();
+  return result;
 };
 
 export const getAllUser = async () => {

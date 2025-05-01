@@ -67,15 +67,22 @@ export const initPassport = (): void => {
   );
 };
 
-export const createUserTokens = (user: Omit<IUser, "password">) => {
-  const accessTokenSecret = process.env.JWT_ACCESS_SECRET ?? "";
-  const refreshTokenSecret = process.env.JWT_REFRESH_SECRET ?? "";
-  console.log("accessTokenSecret", accessTokenSecret);  
-  console.log("refreshTokenSecret", refreshTokenSecret);  
-  const token = jwt.sign(user, accessTokenSecret);
-  const refreshToken = jwt.sign(user, refreshTokenSecret);
-  return { accessToken: token, refreshToken };
+export const createUserTokens = (user: IUser) => {
+  const accessTokenSecret = process.env.JWT_ACCESS_SECRET ?? '';
+  const refreshTokenSecret = process.env.JWT_REFRESH_SECRET ?? '';
+
+  const payload = {
+    id: user._id,         // assuming _id comes from MongoDB
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwt.sign(payload, accessTokenSecret, { expiresIn: '15m' });
+  const refreshToken = jwt.sign(payload, refreshTokenSecret, { expiresIn: '7d' });
+
+  return { accessToken, refreshToken };
 };
+
 
 export const decodeToken = (token: string) => {
   const decode = jwt.decode(token);

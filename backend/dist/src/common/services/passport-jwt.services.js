@@ -71,7 +71,6 @@ const isValidPassword = function (value, password) {
         return compare;
     });
 };
-console.log("process.env.JWT_SECRET", process.env.JWT_SECRET);
 const initPassport = () => {
     passport_1.default.use(new passport_jwt_1.Strategy({
         secretOrKey: process.env.JWT_ACCESS_SECRET || "default_secret",
@@ -116,13 +115,16 @@ const initPassport = () => {
 exports.initPassport = initPassport;
 const createUserTokens = (user) => {
     var _a, _b;
-    const accessTokenSecret = (_a = process.env.JWT_ACCESS_SECRET) !== null && _a !== void 0 ? _a : "";
-    const refreshTokenSecret = (_b = process.env.JWT_REFRESH_SECRET) !== null && _b !== void 0 ? _b : "";
-    console.log("accessTokenSecret", accessTokenSecret);
-    console.log("refreshTokenSecret", refreshTokenSecret);
-    const token = jsonwebtoken_1.default.sign(user, accessTokenSecret);
-    const refreshToken = jsonwebtoken_1.default.sign(user, refreshTokenSecret);
-    return { accessToken: token, refreshToken };
+    const accessTokenSecret = (_a = process.env.JWT_ACCESS_SECRET) !== null && _a !== void 0 ? _a : '';
+    const refreshTokenSecret = (_b = process.env.JWT_REFRESH_SECRET) !== null && _b !== void 0 ? _b : '';
+    const payload = {
+        id: user._id, // assuming _id comes from MongoDB
+        email: user.email,
+        role: user.role,
+    };
+    const accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, { expiresIn: '15m' });
+    const refreshToken = jsonwebtoken_1.default.sign(payload, refreshTokenSecret, { expiresIn: '7d' });
+    return { accessToken, refreshToken };
 };
 exports.createUserTokens = createUserTokens;
 const decodeToken = (token) => {

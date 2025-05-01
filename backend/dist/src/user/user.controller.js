@@ -95,7 +95,9 @@ exports.login = (0, express_async_handler_1.default)((req, res) => __awaiter(voi
 }));
 exports.getUserInfo = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    console.log("req.user", req.user);
+    console.log("User ID", userId);
     const user = yield userService.getUserById(userId);
     res.send((0, response_helper_1.createResponse)(user));
 }));
@@ -135,7 +137,6 @@ const uploadToCloudinary = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 folder: `resume/${(_a = req.auth) === null || _a === void 0 ? void 0 : _a.id}`,
             }, (err, uploadResult) => {
                 if (err || !uploadResult) {
-                    console.error("Cloudinary upload error:", err);
                     return reject(err || new Error("Upload failed"));
                 }
                 resolve({ url: uploadResult.secure_url });
@@ -146,7 +147,6 @@ const uploadToCloudinary = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.send((0, response_helper_1.createResponse)(result.url, "File uploaded successfully"));
     }
     catch (error) {
-        console.error("Error uploading to Cloudinary:", error);
         res.status(500).json({ error: "Failed to upload file" });
     }
 });

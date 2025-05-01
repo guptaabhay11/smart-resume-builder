@@ -15,8 +15,6 @@ const authenticateUser = (req, res, next) => {
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         req.auth = { id: decoded._id, role: decoded.role };
-        console.log("req.auth", req.auth);
-        console.log("req.id", req.auth.id);
         next();
     }
     catch (error) {
