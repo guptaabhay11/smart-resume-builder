@@ -56,35 +56,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadPdf = exports.sendEmail = exports.logout = exports.getUserInfo = exports.login = exports.getAllUser = exports.getUserById = exports.deleteUser = exports.editUser = exports.updateUser = exports.createUser = void 0;
+exports.uploadToCloudinary = exports.sendEmail = exports.getUserInfo = exports.login = exports.getAllUser = exports.getUserById = exports.deleteUser = exports.editUser = exports.updateUser = exports.createUser = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const response_helper_1 = require("../common/helper/response.helper");
 const passport_jwt_services_1 = require("../common/services/passport-jwt.services");
 const sendFile_1 = require("../common/helper/sendFile");
-const cloudinary_1 = require("cloudinary");
 const userService = __importStar(require("./user.service"));
-// Ensure uploadPdfToCloudinary is part of userService
-cloudinary_1.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const cloudinary_config_1 = __importDefault(require("../common/cloudinary/cloudinary.config"));
 exports.createUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.createUser(req.body);
     const { password } = result, user = __rest(result, ["password"]);
-    res.send((0, response_helper_1.createResponse)(user, "User created sucssefully"));
+    res.send((0, response_helper_1.createResponse)(user, "User created successfully"));
 }));
 exports.updateUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.updateUser(req.params.id, req.body);
-    res.send((0, response_helper_1.createResponse)(result, "User updated sucssefully"));
+    res.send((0, response_helper_1.createResponse)(result, "User updated successfully"));
 }));
 exports.editUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.editUser(req.params.id, req.body);
-    res.send((0, response_helper_1.createResponse)(result, "User updated sucssefully"));
+    res.send((0, response_helper_1.createResponse)(result, "User updated successfully"));
 }));
 exports.deleteUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.deleteUser(req.params.id);
-    res.send((0, response_helper_1.createResponse)(result, "User deleted sucssefully"));
+    res.send((0, response_helper_1.createResponse)(result, "User deleted successfully"));
 }));
 exports.getUserById = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.getUserById(req.params.id);
@@ -105,16 +99,9 @@ exports.getUserInfo = (0, express_async_handler_1.default)((req, res) => __await
     const user = yield userService.getUserById(userId);
     res.send((0, response_helper_1.createResponse)(user));
 }));
-exports.logout = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = req.user;
-    // To do: Remove session
-    res.send((0, response_helper_1.createResponse)({}));
-}));
 exports.sendEmail = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, subject, html } = req.body;
     const file = req.file;
-    console.log(req.body);
-    console.log(file);
     if (!file) {
         throw new Error("Failed to file not found");
     }
@@ -134,31 +121,33 @@ exports.sendEmail = (0, express_async_handler_1.default)((req, res) => __awaiter
         throw new Error("Failed to send file");
     }
 }));
-exports.uploadPdf = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-    const file = req.file;
-    if (!userId) {
-        res.status(401).json({ success: false, message: 'Not authenticated' });
-        return;
-    }
-    console.log(file);
-    if (!file || !file.buffer || file.buffer.length === 0) {
-        res.status(400).json({ success: false, message: 'No PDF provided' });
-        return;
-    }
-    if (file.mimetype !== 'application/pdf') {
-        res.status(400).json({ success: false, message: 'Only PDFs allowed' });
-        return;
-    }
+const uploadToCloudinary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const url = yield userService.uploadPdfToCloudinary(file.buffer, userId);
-        res.status(200).json({ success: true, url });
-        return;
+        const file = req.file;
+        if (!file || !file.buffer) {
+            res.status(400).json({ error: "No file provided or file buffer missing" });
+            return;
+        }
+        const result = yield new Promise((resolve, reject) => {
+            var _a;
+            const uploadStream = cloudinary_config_1.default.uploader.upload_stream({
+                resource_type: "auto",
+                folder: `resume/${(_a = req.auth) === null || _a === void 0 ? void 0 : _a.id}`,
+            }, (err, uploadResult) => {
+                if (err || !uploadResult) {
+                    console.error("Cloudinary upload error:", err);
+                    return reject(err || new Error("Upload failed"));
+                }
+                resolve({ url: uploadResult.secure_url });
+            });
+            uploadStream.end(file.buffer);
+        });
+        const updatedUser = yield userService.addPdfUrlToUser(req.auth.id, result.url);
+        res.send((0, response_helper_1.createResponse)(result.url, "File uploaded successfully"));
     }
-    catch (err) {
-        console.error('Upload failed:', err);
-        res.status(500).json({ success: false, message: err.message });
-        return;
+    catch (error) {
+        console.error("Error uploading to Cloudinary:", error);
+        res.status(500).json({ error: "Failed to upload file" });
     }
-}));
+});
+exports.uploadToCloudinary = uploadToCloudinary;

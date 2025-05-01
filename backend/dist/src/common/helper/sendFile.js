@@ -35,8 +35,8 @@ const sendFile = (_a) => __awaiter(void 0, [_a], void 0, function* ({ email, sub
             html,
             attachments: [
                 {
-                    filename: fileName, // The file name as shown in the email
-                    path: filePath, // Path to the file
+                    filename: fileName,
+                    path: filePath,
                 },
             ],
         };

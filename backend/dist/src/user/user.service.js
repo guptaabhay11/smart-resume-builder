@@ -14,16 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadPdfToCloudinary = exports.addPdfUrlToUser = exports.getUserByEmail = exports.getAllUser = exports.getUserById = exports.deleteUser = exports.editUser = exports.updateUser = exports.createUser = void 0;
 const user_schema_1 = __importDefault(require("./user.schema"));
-const cloudinary_1 = require("cloudinary");
-const streamifier_1 = __importDefault(require("streamifier")); // Install with: npm install streamifier
 require('dotenv').config();
-console.log("process.env.CLOUDINARY_CLOUD_NAME", process.env.CLOUDINARY_CLOUD_NAME);
-// Configure Cloudinary
-cloudinary_1.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_schema_1.default.create(Object.assign(Object.assign({}, data), { active: true }));
     return result.toObject();
@@ -67,28 +58,21 @@ const getUserByEmail = (email_1, ...args_1) => __awaiter(void 0, [email_1, ...ar
 exports.getUserByEmail = getUserByEmail;
 const addPdfUrlToUser = (id, pdfUrl) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_schema_1.default.findByIdAndUpdate(id, { $push: { pdf: pdfUrl } }, { new: true }).select('-password');
+    console.log(result);
     return result;
 });
 exports.addPdfUrlToUser = addPdfUrlToUser;
-const uploadPdfToCloudinary = (buffer, userId) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!buffer || buffer.length === 0) {
-        throw new Error('Attempting to upload empty buffer');
+const uploadPdfToCloudinary = (uploadResult, userId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedUser = yield (0, exports.addPdfUrlToUser)(userId, uploadResult.secure_url);
+        if (!updatedUser) {
+            throw new Error("User not found");
+        }
+        return updatedUser;
     }
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary_1.v2.uploader.upload_stream({
-            resource_type: 'raw',
-            folder: `resumeBuilder/${userId}`,
-            format: 'pdf',
-            type: 'upload',
-        }, (error, result) => {
-            if (error || !result) {
-                console.error('Cloudinary upload error:', error);
-                return reject(error || new Error('Upload failed'));
-            }
-            resolve(result.secure_url);
-        });
-        // Pipe the in‑memory buffer directly into Cloudinary’s stream
-        streamifier_1.default.createReadStream(buffer).pipe(uploadStream);
-    });
+    catch (error) {
+        console.error("Error updating user with PDF URL:", error);
+        throw error;
+    }
 });
 exports.uploadPdfToCloudinary = uploadPdfToCloudinary;

@@ -46,12 +46,11 @@ const multer_1 = __importDefault(require("../common/middleware/multer"));
 const multer_2 = __importDefault(require("multer"));
 const uploadPdf = (0, multer_2.default)({ storage: multer_2.default.memoryStorage() });
 const auth_middleware_1 = require("../user/auth.middleware");
-const demo_1 = require("../common/cloudinary/demo");
 const router = (0, express_1.Router)();
 router
     .post("/register", userValidator.createUser, catch_error_middleware_1.catchError, userController.createUser)
     .post("/login", userValidator.login, catch_error_middleware_1.catchError, passport_1.default.authenticate('login', { session: false }), userController.login)
     .get("/me", (0, role_auth_middleware_1.roleAuth)(['USER']), userController.getUserInfo)
     .post("/send-email", multer_1.default.single("file"), userController.sendEmail)
-    .post("/upload-pdf", auth_middleware_1.authenticateUser, uploadPdf.single('file'), demo_1.uploadToCloudinary);
+    .post("/upload-pdf", auth_middleware_1.authenticateUser, uploadPdf.single('file'), userController.uploadToCloudinary);
 exports.default = router;

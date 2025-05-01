@@ -17,9 +17,6 @@ export const authenticateUser = (
   
   const token = req.headers.authorization?.replace('Bearer ', '');
 
-  console.log("token from middle", token)
-  
-  
   if (!token) {
     res.status(401).json({ success: false, message: 'No token provided' });
     return;
@@ -34,8 +31,6 @@ export const authenticateUser = (
 
     req.auth = { id: decoded._id, role: decoded.role };
 
-    console.log("req.auth", req.auth)
-    console.log("req.id", req.auth.id)
     next();
   } catch (error) {
     console.error('JWT verification error:', error);

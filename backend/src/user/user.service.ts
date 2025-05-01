@@ -6,14 +6,8 @@ import streamifier from 'streamifier'; // Install with: npm install streamifier
 
 
 require('dotenv').config();
-console.log("process.env.CLOUDINARY_CLOUD_NAME", process.env.CLOUDINARY_CLOUD_NAME)
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+
 
 export const createUser = async (data: IUser) => {
     const result = await UserSchema.create({ ...data, active: true });
@@ -61,37 +55,25 @@ export const addPdfUrlToUser = async (id: string, pdfUrl: string) => {
     { $push: { pdf: pdfUrl } },
     { new: true }
   ).select('-password');
-
+  
   return result;
 };
 
 
-export const uploadPdfToCloudinary = async (
-    buffer: Buffer,
-    userId: string
-  ): Promise<string> => {
-    if (!buffer || buffer.length === 0) {
-      throw new Error('Attempting to upload empty buffer');
+export const uploadPdfToCloudinary = async (uploadResult: any, userId: string) => {
+  try {
+    const updatedUser = await addPdfUrlToUser(userId, uploadResult.secure_url);
+    
+    if (!updatedUser) {
+      throw new Error("User not found");
     }
-  
-    return new Promise<string>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: 'raw',
-          folder: `resumeBuilder/${userId}`,
-          format: 'pdf',
-          type: 'upload',
-        },
-        (error, result) => {
-          if (error || !result) {
-            console.error('Cloudinary upload error:', error);
-            return reject(error || new Error('Upload failed'));
-          }
-          resolve(result.secure_url);
-        }
-      );
-  
-      // Pipe the in‑memory buffer directly into Cloudinary’s stream
-      streamifier.createReadStream(buffer).pipe(uploadStream);
-    });
-  };
+
+    return updatedUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+ 
+

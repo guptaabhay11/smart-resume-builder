@@ -1,6 +1,4 @@
 import nodemailer from "nodemailer";
-import fs from "fs";
-import path from "path";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -17,8 +15,8 @@ export const sendFile = async ({
   email: string;
   subject: string;
   html: string;
-  filePath: string;  // Path to the file
-  fileName: string;  // Name for the attachment in the email
+  filePath: string;  
+  fileName: string;  
 }) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -38,8 +36,8 @@ export const sendFile = async ({
       html,
       attachments: [
         {
-          filename: fileName, // The file name as shown in the email
-          path: filePath, // Path to the file
+          filename: fileName, 
+          path: filePath, 
         },
       ],
     };

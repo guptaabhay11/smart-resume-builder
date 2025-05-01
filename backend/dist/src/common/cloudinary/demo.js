@@ -45,7 +45,6 @@ const uploadToCloudinary = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     console.error('Cloudinary upload error:', err);
                     return reject(err || new Error('Upload failed'));
                 }
-                // now update the user in Mongo — no await inside this callback:
                 user_schema_1.default
                     .findByIdAndUpdate(req.auth.id, { $push: { pdf: uploadResult.secure_url } }, { new: true })
                     .then((updatedUser) => {

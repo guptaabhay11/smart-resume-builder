@@ -13,7 +13,7 @@ const isValidPassword = async function (value: string, password: string) {
   const compare = await bcrypt.compare(value, password);
   return compare;
 };
-console.log("process.env.JWT_SECRET", process.env.JWT_SECRET)
+
 export const initPassport = (): void => {
   passport.use(
     new Strategy(
