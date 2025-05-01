@@ -1,226 +1,129 @@
 import React from 'react';
+import { useMeQuery } from '../services/api';
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  CircularProgress,
-  Divider,
-  Container,
-  Paper,
-  useTheme,
   Tooltip,
-  IconButton,
-  alpha
-} from '@mui/material';
-import { useMeQuery } from '../services/api'; // adjust the import if needed
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DownloadIcon from '@mui/icons-material/Download';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from '@radix-ui/react-tooltip';
+import {
+  FileText,
+  Download,
+  Eye,
+  AlertCircle,
+  FileIcon,
+  Loader2,
+} from 'lucide-react';
 
 const MyResume = () => {
   const { data, isLoading, isError } = useMeQuery();
-  const theme = useTheme();
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="70vh" flexDirection="column">
-        <CircularProgress size={60} thickness={4} />
-        <Typography mt={3} variant="body1" color="text.secondary">
-          Loading your resumes...
-        </Typography>
-      </Box>
+      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="mt-4 text-gray-500">Loading your resumes...</p>
+      </div>
     );
   }
 
   if (isError || !data?.data) {
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="70vh"
-        flexDirection="column"
-      >
-        <ErrorOutlineIcon color="error" sx={{ fontSize: 60, mb: 2 }} />
-        <Typography color="error" variant="h6">
-          Failed to load resumes
-        </Typography>
-        <Typography color="text.secondary" mt={1}>
-          Please check your connection and try again
-        </Typography>
-      </Box>
+      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+        <AlertCircle className="w-16 h-16 text-red-500 mb-2" />
+        <h2 className="text-xl font-semibold text-red-500">Failed to load resumes</h2>
+        <p className="text-gray-500 mt-1">Please check your connection and try again</p>
+      </div>
     );
   }
 
   const pdfs = data.data.pdf || [];
 
-  const truncateUrl = (url: string) => {
-    if (url.length > 60) {
-      return url.substring(0, 30) + '...' + url.substring(url.length - 30);
-    }
-    return url;
+  const truncateUrl = (url) => {
+    return url.length > 60 ? url.substring(0, 30) + '...' + url.slice(-30) : url;
   };
 
-  const getFileName = (url: string, index: number) => {
+  const getFileName = (url, index) => {
     try {
       const pathParts = new URL(url).pathname.split('/');
-      const fileName = pathParts[pathParts.length - 1];
-      return fileName || `Resume ${index + 1}`;
+      return pathParts[pathParts.length - 1] || `Resume ${index + 1}`;
     } catch {
-      return 'Resume';
+      return `Resume ${index + 1}`;
     }
   };
 
   return (
-    <Container maxWidth="md">
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          borderRadius: 2, 
-          overflow: 'hidden',
-          mt: 4,
-          mb: 6
-        }}
-      >
-        <Box 
-          p={4} 
-          pb={2}
-          sx={{
-            backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
-            borderRadius: '16px 16px 0 0',
-          }}
-        >
-          <Typography variant="h4" fontWeight="bold" color="white">
-            My Resumes
-          </Typography>
-          <Typography variant="subtitle1" color="white" sx={{ opacity: 0.9, mt: 1 }}>
-            View and download your saved resume documents
-          </Typography>
-        </Box>
+    <div className="max-w-3xl mx-auto mt-10 mb-16 px-4">
+      <div className="bg-gradient-to-br from-blue-300 to-blue-500 text-white rounded-t-2xl p-6">
+        <h1 className="text-3xl font-bold">My Resumes</h1>
+        <p className="text-white/90 mt-1">View and download your saved resume documents</p>
+      </div>
 
-        <Box p={3}>
-          {pdfs.length === 0 ? (
-            <Box 
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                py: 6,
-                backgroundColor: alpha(theme.palette.primary.light, 0.05),
-                borderRadius: 2
-              }}
-            >
-              <InsertDriveFileIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2, opacity: 0.6 }} />
-              <Typography variant="h6" color="text.secondary">
-                No resumes saved yet
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mt={1}>
-                Create your first resume to see it here
-              </Typography>
-            </Box>
-          ) : (
-            <Box display="flex" flexDirection="column" gap={3}>
-              {pdfs.map((url, index) => {
-                const fileName = getFileName(url, index);
-                
-                return (
-                  <Card 
-                    key={index} 
-                    elevation={2}
-                    sx={{ 
-                      borderRadius: 2,
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: theme.shadows[6],
-                      }
-                    }}
-                  >
-                    <CardContent>
-                      <Box display="flex" alignItems="center" gap={2}>
-                        <Box 
-                          sx={{ 
-                            backgroundColor: alpha(theme.palette.primary.main, 0.1), 
-                            borderRadius: '50%',
-                            width: 48,
-                            height: 48,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <PictureAsPdfIcon sx={{ color: theme.palette.primary.main }} />
-                        </Box>
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6" fontWeight="500">
-                            {fileName}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Resume {index + 1}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Divider sx={{ my: 2 }} />
-                      
-                      <Tooltip title={url}>
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          sx={{
-                            fontSize: 13,
-                            fontFamily: 'monospace',
-                            backgroundColor: alpha(theme.palette.grey[300], 0.3),
-                            p: 1,
-                            borderRadius: 1,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                        >
-                          {truncateUrl(url)}
-                        </Typography>
+      <div className="bg-white rounded-b-2xl p-6 shadow-sm">
+        {pdfs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-blue-50 rounded-xl">
+            <FileIcon className="w-16 h-16 text-gray-400 mb-3" />
+            <h3 className="text-lg font-semibold text-gray-500">No resumes saved yet</h3>
+            <p className="text-sm text-gray-400 mt-1">Create your first resume to see it here</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {pdfs.map((url, index) => {
+              const fileName = getFileName(url, index);
+              return (
+                <div
+                  key={index}
+                  className="rounded-xl border p-4 transition-shadow hover:shadow-md"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 p-3 rounded-full">
+                      <FileText className="text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-medium">{fileName}</h4>
+                      <span className="text-sm text-gray-500">Resume {index + 1}</span>
+                    </div>
+                  </div>
+
+                  <div className="my-3">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="text-xs bg-gray-100 p-2 rounded font-mono truncate cursor-default">
+                            {truncateUrl(url)}
+                          </p>
+                        </TooltipTrigger>
+                        <TooltipContent sideOffset={5}>
+                          <span className="text-xs break-all max-w-[250px] inline-block">{url}</span>
+                        </TooltipContent>
                       </Tooltip>
-                    </CardContent>
-                    
-                    <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
-                      <Button
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                        color="primary"
-                        size="medium"
-                        startIcon={<VisibilityIcon />}
-                        sx={{ mr: 1, borderRadius: 1.5 }}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        href={url}
-                        download
-                        variant="contained"
-                        color="primary"
-                        size="medium"
-                        startIcon={<DownloadIcon />}
-                        sx={{ borderRadius: 1.5 }}
-                      >
-                        Download
-                      </Button>
-                    </CardActions>
-                  </Card>
-                );
-              })}
-            </Box>
-          )}
-        </Box>
-      </Paper>
-    </Container>
+                    </TooltipProvider>
+                  </div>
+
+                  <div className="flex gap-2 mt-2">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 border border-blue-600 text-blue-600 px-4 py-1.5 rounded-md text-sm hover:bg-blue-50"
+                    >
+                      <Eye className="w-4 h-4" /> View
+                    </a>
+                    <a
+                      href={url}
+                      download
+                      className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm hover:bg-blue-700"
+                    >
+                      <Download className="w-4 h-4" /> Download
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

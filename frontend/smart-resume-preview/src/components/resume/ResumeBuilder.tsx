@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import { PersonalInfoForm } from "./PersonalInfoForm";
@@ -12,7 +11,7 @@ import { ResumeData } from "@/types/resume";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import generatePdf from "react-to-pdf";
 

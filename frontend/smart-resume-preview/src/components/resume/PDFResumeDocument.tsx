@@ -1,5 +1,4 @@
 import React from 'react';
-import { Document, Page } from '@react-pdf/renderer';
 import { PDFClassicTemplate } from './pdf-template/ClassicPdf';
 import {  PDFModernTemplate } from './pdf-template/ModernPdf';
 import { ResumeData } from '@/types/resume';

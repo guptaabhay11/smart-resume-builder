@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { Template } from "@/types/resume";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";

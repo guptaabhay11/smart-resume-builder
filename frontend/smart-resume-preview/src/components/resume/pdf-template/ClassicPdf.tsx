@@ -1,39 +1,34 @@
-import React from "react";
 import {
   Document,
   Page,
   Text,
   View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/types/resume";
-
-// Optionally register a custom font
-
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#FFFFFF",
     padding: 40,
-    fontFamily: "Helvetica", // ← use this
+    fontFamily: "Helvetica",
     fontSize: 11,
-    color: "#1F2937", // slate-800
+    color: "#1F2937", 
   },
   header: {
     textAlign: "center",
     marginBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0", // slate-200
+    borderBottomColor: "#E2E8F0", 
     paddingBottom: 8,
   },
   name: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#111827", // slate-900
+    color: "#111827", 
   },
   title: {
     fontSize: 14,
-    color: "#4B5563", // slate-600
+    color: "#4B5563", 
     marginTop: 4,
   },
   contactContainer: {
@@ -56,7 +51,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   sectionLabel: {
-    backgroundColor: "#F1F5F9", // slate-100
+    backgroundColor: "#F1F5F9", 
     paddingVertical: 2,
     paddingHorizontal: 4,
     borderRadius: 4,
@@ -82,15 +77,15 @@ const styles = StyleSheet.create({
   },
   badge: {
     borderWidth: 1,
-    borderColor: "#CBD5E1", // slate-300
-    backgroundColor: "#F8FAFC", // slate-50
+    borderColor: "#CBD5E1", 
+    backgroundColor: "#F8FAFC", 
     paddingVertical: 2,
     paddingHorizontal: 4,
     marginRight: 4,
     marginBottom: 4,
     borderRadius: 3,
     fontSize: 10,
-    color: "#374151", // slate-700
+    color: "#374151", 
   },
   itemRow: {
     flexDirection: "row",
@@ -113,7 +108,7 @@ const styles = StyleSheet.create({
   },
   underline: {
     height: 1,
-    backgroundColor: "#E5E7EB", // slate-200
+    backgroundColor: "#E5E7EB", 
     marginTop: 12,
     marginBottom: 16,
   },
