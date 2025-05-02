@@ -5,21 +5,11 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import { useLoginMutation } from "../services/api";
-import { jwtDecode } from 'jwt-decode';
 import { useDispatch } from 'react-redux';
 import { setTokens } from '../store/reducers/authReducer';
-import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 
-interface DecodedToken {
-  id?: string;
-  role?: 'USER' | 'ADMIN';
-  name?: string;
-  email?: string;
-  [key: string]: any;
-}
-
-const validation = yup.object({
+const validationSchema = yup.object({
   email: yup.string().email("Email is invalid").required("Email is required"),
   password: yup
     .string()
@@ -28,87 +18,62 @@ const validation = yup.object({
     .max(16, "Maximum 16 characters allowed"),
 });
 
-type FormData = yup.InferType<typeof validation>;
+type FormData = yup.InferType<typeof validationSchema>;
 
 export default function LoginForm() {
   const [loginUser] = useLoginMutation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<FormData>({
-    defaultValues: { email: "", password: "" },
-    resolver: yupResolver(validation),
+    resolver: yupResolver(validationSchema),
     mode: "onChange",
   });
 
-  const handleDashboardClick = () => {
-    navigate('/');
-  };
-
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword(prev => !prev);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: { email: string; password: string }) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
-      // 1. Attempt login
-      const loginResponse = await loginUser(data as { email: string; password: string }).unwrap();
-      
-      if (!loginResponse.success) {
+    
+      const loginResponse = await loginUser(data).unwrap();
+
+      if (!loginResponse?.success || !loginResponse?.data?.accessToken ) {
         throw new Error(loginResponse?.message || "Authentication failed");
       }
 
-      // 2. Store tokens and user data
+      
+
+     
       const { accessToken, refreshToken } = loginResponse.data;
-      
-      // Dispatch action to store tokens in Redux and localStorage
-      dispatch(setTokens({ 
-        accessToken, 
-        refreshToken 
-      }));
+      dispatch(setTokens({ accessToken, refreshToken }));
 
-      // 3. Decode token to get user information
-      const decodedToken = jwtDecode<DecodedToken>(accessToken);
-      
-      if (!decodedToken._id || !decodedToken.role) {
-        throw new Error("Invalid token payload");
-      }
-
-      // 4. Redirect based on role
-      const redirectPath = decodedToken.role === "USER" 
-        ? "/dashboard" 
-        : `/user/dashboard`;
-      
+      // Redirect based on role
+      const redirectPath = "/dashboard"
+    
+        
       navigate(redirectPath, { replace: true });
       toast.success("Login successful!");
-
     } catch (error: any) {
       console.error("Login error:", error);
       
-      // Clear tokens on error
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-
-      let errorMessage = "Login failed. Please try again.";
-      
-      if (error?.status === 401) {
-        errorMessage = "Invalid email or password";
-      } else if (error?.status === 403) {
-        errorMessage = "Account not verified or blocked";
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error(errorMessage);
+      toast.error(
+        error?.status === 401
+          ? "Invalid email or password"
+          : error?.status === 403
+          ? "Account not verified or blocked"
+          : error?.message || "Login failed"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -118,80 +83,65 @@ export default function LoginForm() {
     <div className="min-h-screen bg-[#e8f0f8] flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-gray-300 px-6 py-4 flex items-center justify-between shadow-sm">
-        <div 
+        <div
           className="font-extrabold text-2xl text-[#1e4976] cursor-pointer hover:text-[#4285f4] transition-colors"
-          onClick={handleDashboardClick}
+          onClick={() => navigate("/")}
         >
           Dashboard
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white shadow-xl rounded-xl w-full max-w-md p-8 border border-[#d5e5f6]">
           <h1 className="text-2xl font-bold text-[#1e4976] mb-2">Welcome Back</h1>
           <p className="text-gray-600 mb-6">Please sign in to your account</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1 text-[#1e4976]">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium mb-1 text-[#1e4976]">Email Address</label>
               <input
                 type="email"
+                {...register("email")}
+                autoComplete="email"
+                disabled={isSubmitting}
+                placeholder="you@example.com"
                 className={`w-full px-4 py-2 rounded-lg border ${
                   errors.email ? 'border-red-500' : 'border-[#a3c2e2]'
                 } bg-[#f8fafd] focus:ring-2 focus:ring-[#4285f4] focus:border-transparent outline-none transition-colors`}
-                placeholder="you@example.com"
-                {...register("email")}
-                disabled={isSubmitting}
-                autoComplete="email"
-                autoFocus
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-[#1e4976]">
-                Password
-              </label>
+              <label className="block text-sm font-medium mb-1 text-[#1e4976]">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  autoComplete="current-password"
+                  disabled={isSubmitting}
+                  placeholder="••••••••"
                   className={`w-full px-4 py-2 rounded-lg border ${
                     errors.password ? 'border-red-500' : 'border-[#a3c2e2]'
                   } bg-[#f8fafd] focus:ring-2 focus:ring-[#4285f4] focus:border-transparent outline-none transition-colors`}
-                  placeholder="••••••••"
-                  {...register("password")}
-                  disabled={isSubmitting}
-                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#1e4976]"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
             </div>
 
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
               className={`w-full py-3 rounded-lg text-white font-semibold text-base mt-6 ${
-                !isValid || isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#1e4976] hover:bg-[#0d3c6e]'
+                !isValid || isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1e4976] hover:bg-[#0d3c6e]'
               } transition-colors shadow-md`}
             >
               {isSubmitting ? (
@@ -205,7 +155,7 @@ export default function LoginForm() {
 
             <div className="text-center mt-6">
               <p className="text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <NavLink
                   to="/signup"
                   className="text-[#4285f4] font-medium hover:underline"
@@ -216,7 +166,7 @@ export default function LoginForm() {
             </div>
           </form>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

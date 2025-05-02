@@ -1,6 +1,4 @@
-
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@radix-ui/themes';
 import { FilePlus2, FileText } from 'lucide-react';
 
 const Dashboard = () => {
@@ -40,9 +38,9 @@ const Dashboard = () => {
 
       <div className="bg-white border border-gray-200 px-6 py-6 rounded-b-2xl space-y-4">
         {options.map((option, idx) => (
-          <Card
+          <div
             key={idx}
-            className="cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg rounded-2xl"
+            className="cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg rounded-2xl bg-white border border-gray-200 overflow-hidden"
             onClick={option.onClick}
           >
             <div className="flex items-center gap-6 p-6">
@@ -59,7 +57,7 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-600 mt-1">{option.description}</p>
               </div>
             </div>
-          </Card>
+          </div>
         ))}
 
         <div className="pt-6 text-center border-t border-gray-100">

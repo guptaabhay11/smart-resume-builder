@@ -12,6 +12,8 @@ export const api = createApi({
     prepareHeaders: (headers, { getState }) => {
       // Access the state from Redux
       const token = (getState() as RootState).auth.accessToken;
+    
+      console.log("auth should be here",token);
 
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);

@@ -1,11 +1,5 @@
-import React from 'react';
+import { useState, Suspense, ReactNode } from 'react';
 import { useMeQuery } from '../services/api';
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-  TooltipContent,
-} from '@radix-ui/react-tooltip';
 import {
   FileText,
   Download,
@@ -15,35 +9,42 @@ import {
   Loader2,
 } from 'lucide-react';
 
-const MyResume = () => {
-  const { data, isLoading, isError } = useMeQuery();
+interface TooltipProps {
+  text: string;
+  children: ReactNode;
+}
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh]">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        <p className="mt-4 text-gray-500">Loading your resumes...</p>
+const Tooltip = ({ text, children }: TooltipProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  return (
+    <div className="relative inline-block">
+      <div
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+        className="inline-block"
+      >
+        {children}
       </div>
-    );
-  }
+      {isVisible && (
+        <div className="absolute z-10 px-2 py-1 text-xs bg-gray-900 text-white rounded shadow-lg bottom-full mb-2 left-1/2 transform -translate-x-1/2">
+          <div className="break-all max-w-[250px] inline-block">{text}</div>
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-  if (isError || !data?.data) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh]">
-        <AlertCircle className="w-16 h-16 text-red-500 mb-2" />
-        <h2 className="text-xl font-semibold text-red-500">Failed to load resumes</h2>
-        <p className="text-gray-500 mt-1">Please check your connection and try again</p>
-      </div>
-    );
-  }
+const MyResumeContent = () => {
+  const { data } = useMeQuery();
+  const pdfs = data?.data?.pdf || [];
 
-  const pdfs = data.data.pdf || [];
-
-  const truncateUrl = (url) => {
-    return url.length > 60 ? url.substring(0, 30) + '...' + url.slice(-30) : url;
+  const truncateUrl = (url: string): string => {
+    return url.length > 60 ? `${url.substring(0, 30)}...${url.slice(-30)}` : url;
   };
 
-  const getFileName = (url, index) => {
+  const getFileName = (url: string, index: number): string => {
     try {
       const pathParts = new URL(url).pathname.split('/');
       return pathParts[pathParts.length - 1] || `Resume ${index + 1}`;
@@ -68,7 +69,7 @@ const MyResume = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {pdfs.map((url, index) => {
+            {pdfs.map((url: string, index: number) => {
               const fileName = getFileName(url, index);
               return (
                 <div
@@ -86,18 +87,11 @@ const MyResume = () => {
                   </div>
 
                   <div className="my-3">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <p className="text-xs bg-gray-100 p-2 rounded font-mono truncate cursor-default">
-                            {truncateUrl(url)}
-                          </p>
-                        </TooltipTrigger>
-                        <TooltipContent sideOffset={5}>
-                          <span className="text-xs break-all max-w-[250px] inline-block">{url}</span>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Tooltip text={url}>
+                      <p className="text-xs bg-gray-100 p-2 rounded font-mono truncate cursor-default">
+                        {truncateUrl(url)}
+                      </p>
+                    </Tooltip>
                   </div>
 
                   <div className="flex gap-2 mt-2">
@@ -125,6 +119,10 @@ const MyResume = () => {
       </div>
     </div>
   );
+};
+
+const MyResume = () => {
+  return <MyResumeContent />;
 };
 
 export default MyResume;

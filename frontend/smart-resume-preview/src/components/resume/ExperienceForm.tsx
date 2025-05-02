@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { X, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { v4 as uuidv4 } from "uuid";
@@ -109,16 +108,7 @@ export const ExperienceForm = ({ experience, onChange }: ExperienceFormProps) =>
             </div>
 
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id={`currentJob-${exp.id}`}
-                checked={exp.isCurrentJob}
-                onCheckedChange={(checked) =>
-                  handleChange(exp.id, "isCurrentJob", Boolean(checked))
-                }
-              />
-              <Label htmlFor={`currentJob-${exp.id}`} className="text-sm">
-                This is my current job
-              </Label>
+
             </div>
 
             <div className="space-y-2">
