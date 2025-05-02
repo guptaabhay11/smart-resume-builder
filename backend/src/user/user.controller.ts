@@ -15,20 +15,20 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
     res.send(createResponse(user, "User created successfully"))
 });
 
-export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.updateUser(req.params.id, req.body);
-    res.send(createResponse(result, "User updated successfully"))
-});
+// export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+//     const result = await userService.updateUser(req.params.id, req.body);
+//     res.send(createResponse(result, "User updated successfully"))
+// });
 
-export const editUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.editUser(req.params.id, req.body);
-    res.send(createResponse(result, "User updated successfully"))
-});
+// export const editUser = asyncHandler(async (req: Request, res: Response) => {
+//     const result = await userService.editUser(req.params.id, req.body);
+//     res.send(createResponse(result, "User updated successfully"))
+// });
 
-export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.deleteUser(req.params.id);
-    res.send(createResponse(result, "User deleted successfully"))
-});
+// export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+//     const result = await userService.deleteUser(req.params.id);
+//     res.send(createResponse(result, "User deleted successfully"))
+// });
 
 
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
@@ -51,6 +51,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const getUserInfo = asyncHandler(async (req: Request, res: Response) => {
     const userId = (req.user as any)?.id;
+    console.log("User ID", userId);
 
     const user = await userService.getUserById(userId);
     res.send(createResponse(user))

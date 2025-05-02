@@ -19,11 +19,14 @@ const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const http_1 = __importDefault(require("http"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const fs_1 = __importDefault(require("fs"));
 const error_handler_middleware_1 = __importDefault(require("./src/common/middleware/error-handler.middleware"));
 const database_services_1 = require("./src/common/services/database.services");
 const passport_jwt_services_1 = require("./src/common/services/passport-jwt.services");
 const routes_1 = __importDefault(require("./src/routes"));
 require('dotenv').config();
+const swaggerDocument = JSON.parse(fs_1.default.readFileSync("./src/swagger/userRoutes.json", "utf8"));
 const port = (_a = Number(process.env.PORT)) !== null && _a !== void 0 ? _a : 5000;
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
@@ -38,6 +41,7 @@ app.use(express_1.default.json());
 const initApp = () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, database_services_1.initDB)();
     (0, passport_jwt_services_1.initPassport)();
+    app.use("/api/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
     app.use("/api", routes_1.default);
     app.get("/", (req, res) => {
         res.send({ status: "ok" });

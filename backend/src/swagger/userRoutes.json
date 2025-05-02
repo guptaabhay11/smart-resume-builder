@@ -1,4 +1,22 @@
 {
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Backend API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for the Resume Builder Application",
+    "contact": {
+      "email": "guptaabhay.75way@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Development server"
+    }
+  ],
+
+  
+  "paths": {
     "/users/register": {
       "post": {
         "summary": "Register a new user",
@@ -20,19 +38,9 @@
                   "name": { "type": "string", "example": "abhay" },
                   "email": { "type": "string", "example": "xyz@gmail.com" },
                   "password": { "type": "string", "example": "abhay" },
-                  "role": {
-                    "type": "string",
-                    "enum": ["USER", "ADMIN"],
-                    "example": "USER"
-                  }
+                  "confirmPassword": { "type": "string", "example": "abhay" }
                 },
-                "required": ["name", "email", "password", "role"]
-              },
-              "example": {
-                "name": "abhay",
-                "email": "xyz@gmail.com",
-                "password": "abhay",
-                "role": "USER"
+                "required": ["name", "email", "password", "confirmPassword"]
               }
             }
           }
@@ -46,15 +54,19 @@
                   "type": "object",
                   "properties": {
                     "message": { "type": "string" },
-                    "data": { "type": "object" }
+                    "data": { "$ref": "#/components/schemas/UserData" }
                   },
                   "example": {
                     "message": "User created successfully",
                     "data": {
-                      "_id": "603d9c207f9b4b1f3b10b0e9",
-                      "name": "abhay",
-                      "email": "xyz@gmail.com",
-                      "role": "USER"
+                      "_id": "681497b8457baeb8bb86eef3",
+                      "name": "groot",
+                      "email": "admin@gmail.com",
+                      "role": "USER",
+                      "pdf": ["https://cloudinary.com/xyz.pdf"],
+                      "createdAt": "2025-05-02T10:00:24.141Z",
+                      "updatedAt": "2025-05-02T10:00:24.141Z",
+                      "__v": 0
                     }
                   }
                 }
@@ -68,10 +80,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
-                    "example": {
-                      "message": "User already exists"
-                    }
+                    "message": { "type": "string" }
+                  },
+                  "example": {
+                    "message": "User already exists"
                   }
                 }
               }
@@ -97,10 +109,6 @@
                   "password": { "type": "string", "example": "abhay" }
                 },
                 "required": ["email", "password"]
-              },
-              "example": {
-                "email": "xyz@gmail.com",
-                "password": "abhay"
               }
             }
           }
@@ -113,37 +121,25 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "accessToken": {
-                      "type": "string",
-                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ"
-                    },
-                    "refreshToken": {
-                      "type": "string",
-                      "example": "d2FsY19yZWZyZXNoX3Rva2Vu"
-                    },
-                    "message": { "type": "string", "example": "Login successful" }
+                    "accessToken": { "type": "string" },
+                    "refreshToken": { "type": "string" },
+                    "sucess": { "type": "boolean" }
                   },
                   "example": {
-                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
+                    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
                     "refreshToken": "d2FsY19yZWZyZXNoX3Rva2Vu",
-                    "message": "Login successful"
+                    "sucess": true
                   }
                 }
               }
             }
           },
-          "400": {
+          "401": {
             "description": "Invalid credentials or unverified user",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Invalid email or password"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -151,14 +147,170 @@
         }
       }
     },
-
-    "components": {
-      "securitySchemes": {
-        "bearerAuth": {
-          "type": "http",
-          "scheme": "bearer",
-          "bearerFormat": "JWT"
+    "/users/me": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get current user info",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/send-email": {
+      "post": {
+        "tags": ["Email"],
+        "summary": "Send an email with a file attachment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "subject": { "type": "string" },
+                  "html": { "type": "string" },
+                  "file": { "type": "string", "format": "binary" }
+                },
+                "required": ["email", "subject", "html", "file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing file or required fields" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/users/upload-pdf": {
+      "post": {
+        "tags": ["File Upload"],
+        "summary": "Upload a PDF to Cloudinary",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "string", "description": "Cloudinary secure URL" },
+                    "message": { "type": "string" },
+                    "sucess": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "No file provided or file buffer missing" },
+          "500": { "description": "Failed to upload file" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UserData": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "681497b8457baeb8bb86eef3" },
+          "name": { "type": "string", "example": "groot" },
+          "email": { "type": "string", "example": "admin@gmail.com" },
+          "role": { "type": "string", "example": "USER" },
+          "pdf": {
+            "type": "array",
+            "items": { "type": "string" },
+            "example": ["https://cloudinary.com/xyz.pdf"]
+          },
+          "createdAt": { "type": "string", "format": "date-time", "example": "2025-05-02T10:00:24.141Z" },
+          "updatedAt": { "type": "string", "format": "date-time", "example": "2025-05-02T10:00:24.141Z" },
+          "__v": { "type": "integer", "example": 0 }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "$ref": "#/components/schemas/UserData" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "error_code": { "type": "integer", "example": 401 },
+          "message": { "type": "string", "example": "Invalid token" },
+          "data": { "type": "object", "example": {} }
+        }
+      },
+      "DefaultResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Operation successful" },
+          "success": { "type": "boolean", "example": true }
         }
       }
     }
   }
+}

@@ -56,7 +56,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadToCloudinary = exports.sendEmail = exports.getUserInfo = exports.login = exports.getAllUser = exports.getUserById = exports.deleteUser = exports.editUser = exports.updateUser = exports.createUser = void 0;
+exports.uploadToCloudinary = exports.sendEmail = exports.getUserInfo = exports.login = exports.getAllUser = exports.getUserById = exports.createUser = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const response_helper_1 = require("../common/helper/response.helper");
 const passport_jwt_services_1 = require("../common/services/passport-jwt.services");
@@ -68,18 +68,18 @@ exports.createUser = (0, express_async_handler_1.default)((req, res) => __awaite
     const { password } = result, user = __rest(result, ["password"]);
     res.send((0, response_helper_1.createResponse)(user, "User created successfully"));
 }));
-exports.updateUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield userService.updateUser(req.params.id, req.body);
-    res.send((0, response_helper_1.createResponse)(result, "User updated successfully"));
-}));
-exports.editUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield userService.editUser(req.params.id, req.body);
-    res.send((0, response_helper_1.createResponse)(result, "User updated successfully"));
-}));
-exports.deleteUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield userService.deleteUser(req.params.id);
-    res.send((0, response_helper_1.createResponse)(result, "User deleted successfully"));
-}));
+// export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+//     const result = await userService.updateUser(req.params.id, req.body);
+//     res.send(createResponse(result, "User updated successfully"))
+// });
+// export const editUser = asyncHandler(async (req: Request, res: Response) => {
+//     const result = await userService.editUser(req.params.id, req.body);
+//     res.send(createResponse(result, "User updated successfully"))
+// });
+// export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+//     const result = await userService.deleteUser(req.params.id);
+//     res.send(createResponse(result, "User deleted successfully"))
+// });
 exports.getUserById = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.getUserById(req.params.id);
     res.send((0, response_helper_1.createResponse)(result));
@@ -96,7 +96,6 @@ exports.login = (0, express_async_handler_1.default)((req, res) => __awaiter(voi
 exports.getUserInfo = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-    console.log("req.user", req.user);
     console.log("User ID", userId);
     const user = yield userService.getUserById(userId);
     res.send((0, response_helper_1.createResponse)(user));

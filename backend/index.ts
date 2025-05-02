@@ -4,15 +4,17 @@ import express, { type Express, type Request, type Response } from "express";
 import helmet from "helmet";
 import http from "http";
 import cookieParser from "cookie-parser";
-
-
-
+import swaggerUi from "swagger-ui-express";
+import fs from "fs";
 import errorHandler from "./src/common/middleware/error-handler.middleware";
 import {initDB} from "./src/common/services/database.services";
 import { initPassport } from "./src/common/services/passport-jwt.services";
 import routers from "./src/routes";
 import { type IUser } from "./src/user/user.dto";
 require('dotenv').config()
+
+
+const swaggerDocument = JSON.parse(fs.readFileSync("./src/swagger/userRoutes.json", "utf8"));
 
 declare global {
     namespace Express {
@@ -43,9 +45,10 @@ const initApp = async (): Promise<void> => {
   
     
     initPassport();
-  
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     
     app.use("/api", routers);
+    
   
     app.get("/", (req: Request, res: Response) => {
       res.send({ status: "ok" });

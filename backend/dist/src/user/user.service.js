@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadPdfToCloudinary = exports.addPdfUrlToUser = exports.getUserByEmail = exports.getAllUser = exports.getUserById = exports.deleteUser = exports.editUser = exports.updateUser = exports.createUser = void 0;
+exports.uploadPdfToCloudinary = exports.addPdfUrlToUser = exports.getUserByEmail = exports.getAllUser = exports.getUserById = exports.createUser = void 0;
 const user_schema_1 = __importDefault(require("./user.schema"));
 require('dotenv').config();
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
@@ -20,23 +20,20 @@ const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return result.toObject();
 });
 exports.createUser = createUser;
-const updateUser = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_schema_1.default.findOneAndUpdate({ _id: id }, data, {
-        new: true,
-    });
-    return result;
-});
-exports.updateUser = updateUser;
-const editUser = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_schema_1.default.findOneAndUpdate({ _id: id }, data);
-    return result;
-});
-exports.editUser = editUser;
-const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_schema_1.default.deleteOne({ _id: id });
-    return result;
-});
-exports.deleteUser = deleteUser;
+// export const updateUser = async (id: string, data: IUser) => {
+//     const result = await UserSchema.findOneAndUpdate({ _id: id }, data, {
+//         new: true,
+//     });
+//     return result;
+// };
+// export const editUser = async (id: string, data: Partial<IUser>) => {
+//     const result = await UserSchema.findOneAndUpdate({ _id: id }, data);
+//     return result;
+// };
+// export const deleteUser = async (id: string) => {
+//     const result = await UserSchema.deleteOne({ _id: id });
+//     return result;
+// };
 const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("ID", id);
     const result = yield user_schema_1.default.findById(id)
