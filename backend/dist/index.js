@@ -41,7 +41,7 @@ app.use(express_1.default.json());
 const initApp = () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, database_services_1.initDB)();
     (0, passport_jwt_services_1.initPassport)();
-    app.use("/api/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
+    app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
     app.use("/api", routes_1.default);
     app.get("/", (req, res) => {
         res.send({ status: "ok" });
