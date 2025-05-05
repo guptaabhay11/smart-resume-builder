@@ -3,48 +3,43 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ResumeTemplateSelect from "./pages/ResumeTemplateSelect";
-import ResumeEdit from "./pages/ResumeEdit";
-import Dashboard from "./pages/Dashboard";
-import Signup from "./pages/Signup";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Lazy load the MyResume component
+
+const Index = lazy(() => import('./pages/Index'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const ResumeTemplateSelect = lazy(() => import('./pages/ResumeTemplateSelect'));
+const ResumeEdit = lazy(() => import('./pages/ResumeEdit'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Signup = lazy(() => import('./pages/Signup'));
 const MyResume = lazy(() => import('./pages/MyResume'));
 const LoginForm = lazy(() => import('./pages/Login'));
-
 
 const App = () => (
   <TooltipProvider>
     <Toaster />
     <Sonner />
 
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/select-template" element={<ResumeTemplateSelect />} />
-      <Route path="/edit" element={<ResumeEdit />} />
-    
-      <Route path="*" element={<NotFound />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route 
-  path="/login" 
-  element={
-    <Suspense fallback={<div className="p-8 text-center">Loading login form...</div>}>
-      <LoginForm />
+    <Suspense
+      fallback={
+        <div className="p-8 space-y-4">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/select-template" element={<ResumeTemplateSelect />} />
+        <Route path="/edit" element={<ResumeEdit />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/register" element={<Signup />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/my-resumes" element={<MyResume />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Suspense>
-  }
-/>
-      <Route 
-        path="/my-resumes" 
-        element={
-          <Suspense fallback={<div className="text-center p-8">Loading Resumes...</div>}>
-            <MyResume />
-          </Suspense>
-        } 
-      />
-      <Route path="/register" element={<Signup />} />
-    </Routes>
   </TooltipProvider>
 );
 

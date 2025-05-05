@@ -71,30 +71,30 @@ const DropdownMenuItem = React.forwardRef<
 ))
 DropdownMenuItem.displayName = "DropdownMenuItem"
 
-const DropdownMenuLabel = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { inset?: boolean }
->(({ className, inset, ...props }, ref) => (
+const DropdownMenuLabel = ({
+  className,
+  inset,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { inset?: boolean }) => (
   <div
-    ref={ref}
     className={cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
     {...props}
   />
-))
+)
 DropdownMenuLabel.displayName = "DropdownMenuLabel"
 
-const DropdownMenuSeparator = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+const DropdownMenuSeparator = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    ref={ref}
     role="separator"
     className={cn("-mx-1 my-1 h-px bg-muted", className)}
     {...props}
   />
-))
+)
 DropdownMenuSeparator.displayName = "DropdownMenuSeparator"
+
 
 const DropdownMenuShortcut = ({
   className,

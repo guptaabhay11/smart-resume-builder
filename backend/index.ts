@@ -30,7 +30,7 @@ const app: Express = express();
 
 app.use(cors({
   origin: 'http://localhost:8080',
-  credentials: true, // This allows cookies and credentials to be sent
+  credentials: true, 
 }));
 app.use(helmet())
 app.use(cookieParser())
