@@ -13,8 +13,19 @@ import routers from "./src/routes";
 import { type IUser } from "./src/user/user.dto";
 require('dotenv').config()
 
-
-const swaggerDocument = JSON.parse(fs.readFileSync("./src/swagger/userRoutes.json", "utf8"));
+const userRoutes = JSON.parse(fs.readFileSync("./src/swagger/userRoutes.json", "utf8"));
+const resumeRoutes = JSON.parse(fs.readFileSync("./src/swagger/resumeRoutes.json", "utf8"));
+const swaggerDocument = {
+  ...userRoutes,
+  paths: {
+    ...userRoutes.paths,
+    ...resumeRoutes.paths
+  },
+  components: {
+    ...userRoutes.components,
+    ...resumeRoutes.components
+  }
+};
 
 declare global {
     namespace Express {
@@ -24,7 +35,7 @@ declare global {
       }
     }
   }
-  const port = Number(process.env.PORT) ?? 5000;
+const port = Number(process.env.PORT) ?? 5000;
 
 const app: Express = express();
 

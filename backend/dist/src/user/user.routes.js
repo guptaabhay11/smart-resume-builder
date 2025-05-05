@@ -52,5 +52,6 @@ router
     .post("/login", userValidator.login, catch_error_middleware_1.catchError, passport_1.default.authenticate('login', { session: false }), userController.login)
     .get("/me", (0, role_auth_middleware_1.roleAuth)(['USER']), userController.getUserInfo)
     .post("/send-email", multer_1.default.single("file"), userController.sendEmail)
+    .post("/refresh", userValidator.refreshToken, catch_error_middleware_1.catchError, userController.refreshToken)
     .post("/upload-pdf", auth_middleware_1.authenticateUser, uploadPdf.single('file'), userController.uploadToCloudinary);
 exports.default = router;

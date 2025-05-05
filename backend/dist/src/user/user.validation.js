@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editUser = exports.updateUser = exports.createUser = exports.login = void 0;
+exports.refreshToken = exports.editUser = exports.updateUser = exports.createUser = exports.login = void 0;
 const express_validator_1 = require("express-validator");
 const userService = __importStar(require("./user.service"));
 exports.login = (0, express_validator_1.checkExact)([
@@ -79,4 +79,7 @@ exports.editUser = [
     (0, express_validator_1.body)('email').isEmail().withMessage('Email must be valid'),
     (0, express_validator_1.body)('active').isBoolean().withMessage('active must be a boolean'),
     (0, express_validator_1.body)('password').isString().withMessage('Password must be a string'),
+];
+exports.refreshToken = [
+    (0, express_validator_1.body)("refreshToken").notEmpty().withMessage("Refresh token is required"),
 ];

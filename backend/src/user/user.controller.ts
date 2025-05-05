@@ -8,6 +8,8 @@ import { type IUser } from "./user.dto";
 import { sendFile } from "../common/helper/sendFile";
 import * as userService from "./user.service";
 import cloudinary from "../common/cloudinary/cloudinary.config";
+import jwt from "jsonwebtoken";
+
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
     const result = await userService.createUser(req.body);
@@ -85,6 +87,7 @@ export const sendEmail = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+
 export const uploadToCloudinary = async (
   req: AuthenticatedRequest,
   res: Response
@@ -95,6 +98,8 @@ export const uploadToCloudinary = async (
       res.status(400).json({ error: "No file provided or file buffer missing" });
       return;
     }
+    
+    console.log("Authenticated User ID:", req.auth?.id);
 
     const result = await new Promise<{ url: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -104,7 +109,6 @@ export const uploadToCloudinary = async (
         },
         (err, uploadResult) => {
           if (err || !uploadResult) {
-         
             return reject(err || new Error("Upload failed"));
           }
           resolve({ url: uploadResult.secure_url });
@@ -114,15 +118,29 @@ export const uploadToCloudinary = async (
       uploadStream.end(file.buffer);
     });
 
+    // Add the PDF URL as a new resume reference in the user's pdf array
     const updatedUser = await userService.addPdfUrlToUser(req.auth!.id, result.url);
 
     res.send(createResponse(result.url, "File uploaded successfully"));
   } catch (error) {
-  
+    console.log(error);
     res.status(500).json({ error: "Failed to upload file" });
   }
 };
-
   
+export const refreshToken = asyncHandler(async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
 
+  if (!refreshToken) {
+    throw new Error("Refresh token is required");
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as { userId: string, role: string };
+    const accessToken = userService.generateRefreshToken(decoded.userId, decoded.role);
+    throw new Error("User not found");
+  } catch (err) {
+    throw new Error("Invalid refresh token");
+  }
+})
 

@@ -40,6 +40,7 @@ export interface PersonalInfo {
 }
 
 export interface ResumeData {
+  url: string;
   personalInfo: PersonalInfo;
   skills: string[];
   education: Education[];
@@ -65,6 +66,15 @@ export interface User {
 }
   
 export interface ApiResponse<T> {
+  url: string;
+  personalInfo: { fullName: string; email: string; phone: string; location: string; title: string; summary: string; linkedin: string; github: string; website: string; };
+  skills: string[];
+  education: string[];
+  experience: string[];
+  projects: string[];
+  createdAt: string;
+  updatedAt: string;
+  _id: string;
   data: T;
   message: string;
   success: boolean;

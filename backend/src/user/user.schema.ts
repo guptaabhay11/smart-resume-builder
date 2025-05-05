@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import { type IUser } from "./user.dto";
 import bcrypt from "bcrypt";
 
@@ -26,10 +26,8 @@ const UserSchema = new Schema<IUser>(
       enum: ["USER", "ADMIN"],
       default: "USER",
     },
-    pdf: {
-      type: [String],
-      default: [],
-    },
+    pdf: [{ type: mongoose.Schema.Types.ObjectId, ref: "Resume" }],
+
     refreshToken: {
       type: String,
     }

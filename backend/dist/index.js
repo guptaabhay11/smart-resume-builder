@@ -26,7 +26,9 @@ const database_services_1 = require("./src/common/services/database.services");
 const passport_jwt_services_1 = require("./src/common/services/passport-jwt.services");
 const routes_1 = __importDefault(require("./src/routes"));
 require('dotenv').config();
-const swaggerDocument = JSON.parse(fs_1.default.readFileSync("./src/swagger/userRoutes.json", "utf8"));
+const userRoutes = JSON.parse(fs_1.default.readFileSync("./src/swagger/userRoutes.json", "utf8"));
+const resumeRoutes = JSON.parse(fs_1.default.readFileSync("./src/swagger/resumeRoutes.json", "utf8"));
+const swaggerDocument = Object.assign(Object.assign({}, userRoutes), { paths: Object.assign(Object.assign({}, userRoutes.paths), resumeRoutes.paths), components: Object.assign(Object.assign({}, userRoutes.components), resumeRoutes.components) });
 const port = (_a = Number(process.env.PORT)) !== null && _a !== void 0 ? _a : 5000;
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({

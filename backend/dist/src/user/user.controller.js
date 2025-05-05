@@ -56,13 +56,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadToCloudinary = exports.sendEmail = exports.getUserInfo = exports.login = exports.getAllUser = exports.getUserById = exports.createUser = void 0;
+exports.refreshToken = exports.uploadToCloudinary = exports.sendEmail = exports.getUserInfo = exports.login = exports.getAllUser = exports.getUserById = exports.createUser = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const response_helper_1 = require("../common/helper/response.helper");
 const passport_jwt_services_1 = require("../common/services/passport-jwt.services");
 const sendFile_1 = require("../common/helper/sendFile");
 const userService = __importStar(require("./user.service"));
 const cloudinary_config_1 = __importDefault(require("../common/cloudinary/cloudinary.config"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 exports.createUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield userService.createUser(req.body);
     const { password } = result, user = __rest(result, ["password"]);
@@ -123,12 +124,14 @@ exports.sendEmail = (0, express_async_handler_1.default)((req, res) => __awaiter
     }
 }));
 const uploadToCloudinary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const file = req.file;
         if (!file || !file.buffer) {
             res.status(400).json({ error: "No file provided or file buffer missing" });
             return;
         }
+        console.log("Authenticated User ID:", (_a = req.auth) === null || _a === void 0 ? void 0 : _a.id);
         const result = yield new Promise((resolve, reject) => {
             var _a;
             const uploadStream = cloudinary_config_1.default.uploader.upload_stream({
@@ -142,11 +145,27 @@ const uploadToCloudinary = (req, res) => __awaiter(void 0, void 0, void 0, funct
             });
             uploadStream.end(file.buffer);
         });
+        // Add the PDF URL as a new resume reference in the user's pdf array
         const updatedUser = yield userService.addPdfUrlToUser(req.auth.id, result.url);
         res.send((0, response_helper_1.createResponse)(result.url, "File uploaded successfully"));
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Failed to upload file" });
     }
 });
 exports.uploadToCloudinary = uploadToCloudinary;
+exports.refreshToken = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+        throw new Error("Refresh token is required");
+    }
+    try {
+        const decoded = jsonwebtoken_1.default.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const accessToken = userService.generateRefreshToken(decoded.userId, decoded.role);
+        throw new Error("User not found");
+    }
+    catch (err) {
+        throw new Error("Invalid refresh token");
+    }
+}));

@@ -40,3 +40,7 @@ export const editUser = [
     body('active').isBoolean().withMessage('active must be a boolean'),
     body('password').isString().withMessage('Password must be a string'),
 ];
+
+export const refreshToken = [
+    body("refreshToken").notEmpty().withMessage("Refresh token is required"),
+]

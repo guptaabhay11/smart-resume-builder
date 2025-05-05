@@ -216,51 +216,8 @@
           "500": { "description": "Server error" }
         }
       }
-    },
-    "/users/upload-pdf": {
-      "post": {
-        "tags": ["File Upload"],
-        "summary": "Upload a PDF to Cloudinary",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": { "type": "string", "format": "binary" }
-                },
-                "required": ["file"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": { "type": "string", "description": "Cloudinary secure URL" },
-                    "message": { "type": "string" },
-                    "sucess": { "type": "boolean" }
-                  }
-                }
-              }
-            }
-          },
-          "400": { "description": "No file provided or file buffer missing" },
-          "500": { "description": "Failed to upload file" }
-        }
-      }
     }
+    
   },
   "components": {
     "securitySchemes": {

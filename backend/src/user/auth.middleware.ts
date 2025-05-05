@@ -24,12 +24,11 @@ export const authenticateUser = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      _id: string;
+      id: string;
       role: string;
     };
 
-
-    req.auth = { id: decoded._id, role: decoded.role };
+    req.auth = { id: decoded.id, role: decoded.role };
 
     next();
   } catch (error) {

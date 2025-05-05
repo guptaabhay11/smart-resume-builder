@@ -72,12 +72,12 @@ export const createUserTokens = (user: IUser) => {
   const refreshTokenSecret = process.env.JWT_REFRESH_SECRET ?? '';
 
   const payload = {
-    id: user._id,         // assuming _id comes from MongoDB
+    id: user._id,      
     email: user.email,
     role: user.role,
   };
 
-  const accessToken = jwt.sign(payload, accessTokenSecret, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, accessTokenSecret, { expiresIn: '1d' });
   const refreshToken = jwt.sign(payload, refreshTokenSecret, { expiresIn: '7d' });
 
   return { accessToken, refreshToken };

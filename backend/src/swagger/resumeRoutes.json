@@ -1,0 +1,274 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Resume Builder API",
+      "version": "1.0.0",
+      "description": "API documentation for the Resume Builder Application",
+      "contact": {
+        "email": "guptaabhay.75way@gmail.com"
+      }
+    },
+    "servers": [
+      {
+        "url": "http://localhost:5000/api",
+        "description": "Development server"
+      }
+    ],
+    "paths": {
+      "/resumes/create": {
+        "post": {
+          "summary": "Create a new resume",
+          "tags": ["Resume"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "description": "Resume data",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Resume" }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Resume created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string" },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Resume created successfully",
+                    "data": { "id": "resume_id" }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string" },
+                      "error": { "type": "string" }
+                    },
+                    "example": {
+                      "message": "Unauthorized",
+                      "error": "Invalid token"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string" },
+                      "error": { "type": "string" }
+                    },
+                    "example": {
+                      "message": "Bad request",
+                      "error": "Invalid input data"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/resumes/update/{id}": {
+        "patch": {
+          "summary": "Update a resume",
+          "tags": ["Resume"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Resume" }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Resume updated successfully"
+            },
+            "404": {
+              "description": "Resume not found"
+            }
+          }
+        }
+      },
+      "/resumes/delete/{id}": {
+        "delete": {
+          "summary": "Delete a resume",
+          "tags": ["Resume"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Resume deleted successfully"
+            },
+            "404": {
+              "description": "Resume not found"
+            }
+          }
+        }
+      },
+      "/resumes/all": {
+        "get": {
+          "summary": "Get all resumes for the authenticated user",
+          "tags": ["Resume"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "All resumes fetched successfully"
+            }
+          }
+        }
+      },
+      "/resumes/upload-pdf": {
+        "post": {
+          "summary": "Upload PDF to Cloudinary",
+          "tags": ["Resume"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "File uploaded successfully"
+            },
+            "400": {
+              "description": "No file provided or invalid"
+            },
+            "500": {
+              "description": "Failed to upload file"
+            }
+          }
+        }
+      },
+      "/resume/{id}": {
+        "get": {
+          "summary": "Get a resume by ID",
+          "tags": ["Resume"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Resume fetched successfully"
+            },
+            "404": {
+              "description": "Resume not found"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      },
+      "schemas": {
+        "Resume": {
+          "type": "object",
+          "properties": {
+            "personalInfo": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "email": { "type": "string" },
+                "phone": { "type": "string" },
+                "city": { "type": "string" }
+              }
+            },
+            "education": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "institution": { "type": "string" },
+                  "degree": { "type": "string" },
+                  "year": { "type": "string" }
+                }
+              }
+            },
+            "projects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            },
+            "skills": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": ["personalInfo"]
+        }
+      }
+    }
+  }
+  

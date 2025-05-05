@@ -12,9 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadPdfToCloudinary = exports.addPdfUrlToUser = exports.getUserByEmail = exports.getAllUser = exports.getUserById = exports.createUser = void 0;
+exports.generateRefreshToken = exports.uploadPdfToCloudinary = exports.addPdfUrlToUser = exports.getUserByEmail = exports.getAllUser = exports.getUserById = exports.createUser = void 0;
 const user_schema_1 = __importDefault(require("./user.schema"));
 require('dotenv').config();
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_schema_1.default.create(Object.assign(Object.assign({}, data), { active: true }));
     return result.toObject();
@@ -74,3 +75,7 @@ const uploadPdfToCloudinary = (uploadResult, userId) => __awaiter(void 0, void 0
     }
 });
 exports.uploadPdfToCloudinary = uploadPdfToCloudinary;
+const generateRefreshToken = (id, role) => {
+    return jsonwebtoken_1.default.sign({ id, role }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+};
+exports.generateRefreshToken = generateRefreshToken;

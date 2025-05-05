@@ -118,11 +118,11 @@ const createUserTokens = (user) => {
     const accessTokenSecret = (_a = process.env.JWT_ACCESS_SECRET) !== null && _a !== void 0 ? _a : '';
     const refreshTokenSecret = (_b = process.env.JWT_REFRESH_SECRET) !== null && _b !== void 0 ? _b : '';
     const payload = {
-        id: user._id, // assuming _id comes from MongoDB
+        id: user._id,
         email: user.email,
         role: user.role,
     };
-    const accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, { expiresIn: '15m' });
+    const accessToken = jsonwebtoken_1.default.sign(payload, accessTokenSecret, { expiresIn: '1d' });
     const refreshToken = jsonwebtoken_1.default.sign(payload, refreshTokenSecret, { expiresIn: '7d' });
     return { accessToken, refreshToken };
 };

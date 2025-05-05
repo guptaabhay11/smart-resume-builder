@@ -2,7 +2,7 @@
 import { type IUser } from "./user.dto";
 import UserSchema from "./user.schema";
 require('dotenv').config();
-
+import jwt from "jsonwebtoken";
 
 
 export const createUser = async (data: IUser) => {
@@ -73,6 +73,9 @@ export const uploadPdfToCloudinary = async (uploadResult: any, userId: string) =
   }
 };
 
+export const generateRefreshToken = (id: string, role: string): string => {
+  return jwt.sign({ id, role }, process.env.JWT_REFRESH_SECRET as string, { expiresIn: "7d" });
+};
 
  
 
